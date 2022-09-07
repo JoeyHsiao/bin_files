@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "=================== BUILD IMAGE ==================="
+echo "./Qbuild all"
+echo "./Qbuild clean"
+echo "./Qbuild distclean"
+echo "rm -rf ~/workspace/tmp/C54/gem6xxx; mv openwrt/bin/targets/gem6xxx ~/workspace/tmp/C54/"
+echo ""
+echo "=================== REPO ==================="
+echo "repo3 diff"
+echo "repo3 sync -c"
+echo ""
+echo "=================== GREP ==================="
+echo "grep -v \"\.js:\" | grep -v \"\.css:\" | grep -v \"\.lua:\" | grep -v \"\.html:\" | grep -v \"\.json:\" | grep -v \"\.po:\" | grep -v \"\.cmd:\""
+echo ""
