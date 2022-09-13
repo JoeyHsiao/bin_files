@@ -1,0 +1,82 @@
+#!/bin/bash
+set +x
+
+devicesList=("empty")
+devicesNum=0
+
+function getDevicesList()
+{
+	outputLines="$(nmcli -t -f DEVICE,TYPE dev)"
+	
+	for line in $outputLines
+	do
+		devicesList+=($line)
+	done
+	devicesNum=$((${#devicesList[@]}-1))
+}
+
+function showDevicesList()
+{
+	local interface=""
+	local type=""
+	printf "%-4s %-15s %s\n" "" "DEVICE" "TYPE"
+	
+	for ((i=1; i<=$devicesNum; i++))
+	{
+		line="${devicesList[$i]}"
+		interface=$(echo $line | cut -d : -f 1)
+		type=$(echo $line | cut -d : -f 2)
+		printf "%-4s %-15s %s\n" "${i}:" $interface $type
+	}
+	
+}
+
+function setRoute()
+{
+	local interface=$1
+	local routeTable="MainRoute"
+	
+	echo "Choose interface = $interface"
+	gateway=$(ip -4 route | grep "default" | grep "$interface" | awk '{print $3}')
+	echo "Gateway = $gateway"
+	
+	if [ -z "$(cat /etc/iproute2/rt_tables | grep $routeTable)" ]; then
+		echo "Route table $routeTable not exist, setting ..."
+		echo "100 $routeTable" >> /etc/iproute2/rt_tables
+	fi
+	
+	echo "New route table $routeTable, setting ..."
+	ip rule flush table $routeTable
+	ip rule add from all table $routeTable
+	echo "New route, setting ..."
+	ip route flush table $routeTable
+	ip route add default via $gateway table $routeTable
+	
+}
+
+function main()
+{
+	local chooseIndex=0
+	
+	getDevicesList
+	if [[ "$devicesNum" -lt "1" ]]; then
+		echo "No device"
+		exit 0
+	fi
+	showDevicesList
+
+	read -p "Which interface to set default? " chooseIndex
+	if [[ "$chooseIndex" -gt "$devicesNum" || "$chooseIndex" -lt "1" ]]; then
+		echo "Please Select 1 to $devicesNum"
+		exit 0
+	else
+		interface=$(echo ${devicesList[$chooseIndex]} | cut -d : -f 1)
+	fi
+
+	echo ""
+	setRoute $interface
+}
+
+main
+
+set +x
