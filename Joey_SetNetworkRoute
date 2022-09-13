@@ -45,13 +45,16 @@ function setRoute()
 		echo "100 $routeTable" >> /etc/iproute2/rt_tables
 	fi
 	
-	echo "New route table $routeTable, setting ..."
+	echo ""
 	ip rule flush table $routeTable
 	ip rule add from all table $routeTable
-	echo "New route, setting ..."
+	echo "===== ip rule show ====="
+	ip rule show
+	echo ""
 	ip route flush table $routeTable
 	ip route add default via $gateway table $routeTable
-	
+	echo "===== ip route show table $routeTable ====="
+	ip route show table $routeTable
 }
 
 function main()
