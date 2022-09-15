@@ -19,14 +19,16 @@ function showDevicesList()
 {
 	local interface=""
 	local type=""
-	printf "%-4s %-15s %s\n" "" "DEVICE" "TYPE"
+	printf "%-4s | %-20s | %s\n" "" "DEVICE" "TYPE"
+	echo "--------------------------------------------"
 	
 	for ((i=1; i<=$devicesNum; i++))
 	{
 		line="${devicesList[$i]}"
 		interface=$(echo $line | cut -d : -f 1)
 		type=$(echo $line | cut -d : -f 2)
-		printf "%-4s %-15s %s\n" "${i}:" $interface $type
+		printf "%-4s | %-20s | %s\n" "${i}:" $interface $type
+		echo "--------------------------------------------"
 	}
 	
 }
