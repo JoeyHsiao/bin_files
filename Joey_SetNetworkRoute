@@ -6,11 +6,12 @@ devicesNum=0
 
 function getDevicesList()
 {
-	outputLines="$(nmcli -t -f DEVICE,TYPE dev)"
+	outputLines="$(nmcli -t -f DEVICE,TYPE,STATE dev)"
 	
 	for line in $outputLines
 	do
-		devicesList+=($line)
+		interfaceState=$(echo $line | cut -d : -f 3)
+		[ "$interfaceState" == "connected" ] && devicesList+=($line)
 	done
 	devicesNum=$((${#devicesList[@]}-1))
 }
@@ -37,6 +38,12 @@ function setRoute()
 {
 	local interface=$1
 	local routeTable="MainRoute"
+	
+	if [ -z "$interface" ]; then
+		ip route flush table $routeTable
+		ip rule flush table $routeTable
+		exit 0
+	fi
 	
 	echo "Choose interface = $interface"
 	gateway=$(ip -4 route | grep "default" | grep "$interface" | awk '{print $3}')
@@ -70,8 +77,10 @@ function main()
 	fi
 	showDevicesList
 
-	read -p "Which interface to set default? " chooseIndex
-	if [[ "$chooseIndex" -gt "$devicesNum" || "$chooseIndex" -lt "1" ]]; then
+	read -p "Which interface to set default? (Empty to clean) " chooseIndex
+	if [ -z "$chooseIndex" ]; then
+		setRoute ""
+	elif [[ "$chooseIndex" -gt "$devicesNum" || "$chooseIndex" -lt "1" ]]; then
 		echo "Please Select 1 to $devicesNum"
 		exit 0
 	else
