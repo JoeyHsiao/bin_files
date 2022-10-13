@@ -1,0 +1,42 @@
+#!/bin/bash
+
+action=$1
+mountLocation=$2
+
+[ -z "$mountLocation" ] && mountLocation="/home/joeyhsiao/workspace/server"
+
+echo "action: $action"
+echo "mount location: $mountLocation"
+
+if [ "$action" == "mount" ]; then
+
+    if [ -e $mountLocation ]; then
+        echo "File or folder exist, remove"
+        rm -rf $mountLocation
+    fi
+    mkdir $mountLocation
+    sshfs joey_hsiao@10.242.116.33:/home/joey_hsiao/host_share $mountLocation
+
+    if [ "$?" == "0" ]; then
+        echo "Mount server to $mountLocation finish!!"
+     else
+        echo "Mount server to $mountLocation failed!!"
+        rm -rf $mountLocation
+    fi
+    
+elif [ "$action" == "umount" ]; then
+
+    mountLocation=$(mount | grep joey_hsiao@10.242.116.33 | cut -d' ' -f3)
+    [ -z "$mountLocation" ] && echo "Server not mount yet" $$ exit 1
+    sudo umount $mountLocation
+
+    if [ "$?" == "0" ]; then
+        echo "Unmount server to $mountLocation finish!!"
+        rm -rf $mountLocation
+     else
+        echo "Unmount server to $mountLocation failed!!"
+    fi
+
+else
+    echo "Command failed"
+fi
