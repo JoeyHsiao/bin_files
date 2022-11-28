@@ -15,7 +15,8 @@ if [ "$action" == "mount" ]; then
         rm -rf $mountLocation
     fi
     mkdir $mountLocation
-    sshfs joey_hsiao@10.242.116.33:/home/joey_hsiao/host_share $mountLocation
+    #sshfs joey_hsiao@10.242.116.33:/home/joey_hsiao/host_share $mountLocation
+    sshfs -o ssh_command='ssh -J joey@10.242.116.33' joey@10.33.189.104:/home/joey/ $mountLocation
 
     if [ "$?" == "0" ]; then
         echo "Mount server to $mountLocation finish!!"
